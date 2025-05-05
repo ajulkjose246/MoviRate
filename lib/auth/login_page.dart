@@ -1,24 +1,23 @@
+// ignore_for_file: use_build_context_synchronously
+
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:toastification/toastification.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'login_page.dart';
-import '../auth/firebase_auth_service.dart';
+import 'register_page.dart';
+import '../services/firebase_auth_service.dart';
+import 'auth_gate.dart';
 
-class RegisterPage extends StatefulWidget {
-  const RegisterPage({super.key});
+class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
 
   @override
-  State<RegisterPage> createState() => _RegisterPageState();
+  State<LoginPage> createState() => _LoginPageState();
 }
 
-class _RegisterPageState extends State<RegisterPage> {
-  final TextEditingController _nameController = TextEditingController();
+class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController =
-      TextEditingController();
   bool _obscurePassword = true;
-  bool _obscureConfirmPassword = true;
   final FirebaseAuthService _authService = FirebaseAuthService();
 
   @override
@@ -27,7 +26,11 @@ class _RegisterPageState extends State<RegisterPage> {
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFFE3E6EF), Color(0xFFD1D8F0), Color(0xFFF5F6FA)],
+            colors: [
+              Color(0xFFE3E6EF),
+              Color(0xFFD1D8F0),
+              Color(0xFFF5F6FA),
+            ], // Soft gray to light blue/lavender
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -45,23 +48,8 @@ class _RegisterPageState extends State<RegisterPage> {
                     height: 250,
                     fit: BoxFit.contain,
                   ),
+
                   SizedBox(height: 32),
-                  TextField(
-                    controller: _nameController,
-                    style: TextStyle(color: Colors.black87),
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: Colors.white,
-                      hintText: 'Name',
-                      hintStyle: TextStyle(color: Colors.black38),
-                      prefixIcon: Icon(Icons.person, color: Color(0xFF5B5B8C)),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide(color: Color(0xFFB0B3C6)),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 20),
                   TextField(
                     controller: _emailController,
                     style: TextStyle(color: Colors.black87),
@@ -107,36 +95,14 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                     ),
                   ),
-                  SizedBox(height: 20),
-                  TextField(
-                    controller: _confirmPasswordController,
-                    obscureText: _obscureConfirmPassword,
-                    style: TextStyle(color: Colors.black87),
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: Colors.white,
-                      hintText: 'Confirm Password',
-                      hintStyle: TextStyle(color: Colors.black38),
-                      prefixIcon: Icon(
-                        Icons.lock_outline,
-                        color: Color(0xFF5B5B8C),
-                      ),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscureConfirmPassword
-                              ? Icons.visibility_off
-                              : Icons.visibility,
-                          color: Colors.black38,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _obscureConfirmPassword = !_obscureConfirmPassword;
-                          });
-                        },
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide(color: Color(0xFFB0B3C6)),
+                  SizedBox(height: 12),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () {},
+                      child: Text(
+                        'Forgot Password?',
+                        style: TextStyle(color: Color(0xFF5B5B8C)),
                       ),
                     ),
                   ),
@@ -145,7 +111,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     width: double.infinity,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFF5B5B8C),
+                        backgroundColor: Color(0xFF5B5B8C), // Muted blue accent
                         foregroundColor: Colors.white,
                         padding: EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
@@ -159,26 +125,12 @@ class _RegisterPageState extends State<RegisterPage> {
                         shadowColor: Color(0xFF5B5B8C).withOpacity(0.2),
                       ),
                       onPressed: () async {
-                        final name = _nameController.text.trim();
                         final email = _emailController.text.trim();
                         final password = _passwordController.text.trim();
-                        final confirmPassword =
-                            _confirmPasswordController.text.trim();
-                        if (name.isEmpty ||
-                            email.isEmpty ||
-                            password.isEmpty ||
-                            confirmPassword.isEmpty) {
+                        if (email.isEmpty || password.isEmpty) {
                           toastification.show(
                             context: context,
-                            title: Text('Please fill all fields.'),
-                            autoCloseDuration: const Duration(seconds: 5),
-                          );
-                          return;
-                        }
-                        if (password != confirmPassword) {
-                          toastification.show(
-                            context: context,
-                            title: Text('Passwords do not match.'),
+                            title: Text('Please enter email and password.'),
                             autoCloseDuration: const Duration(seconds: 5),
                           );
                           return;
@@ -191,26 +143,24 @@ class _RegisterPageState extends State<RegisterPage> {
                                   Center(child: CircularProgressIndicator()),
                         );
                         try {
-                          await _authService.registerWithEmail(email, password);
-                          Navigator.of(context).pop(); // Remove loading
-                          // TODO: Navigate to home or main page
+                          await _authService.signInWithEmail(email, password);
+                          Navigator.of(context).pop();
                         } catch (e) {
-                          Navigator.of(context).pop(); // Remove loading
-                          String errorMsg =
-                              'Registration failed. Please try again.';
+                          Navigator.of(context).pop();
+                          String errorMsg = 'Login failed. Please try again.';
                           if (e is FirebaseAuthException) {
                             switch (e.code) {
                               case 'invalid-email':
                                 errorMsg = 'Invalid email address.';
                                 break;
-                              case 'email-already-in-use':
-                                errorMsg = 'Email is already in use.';
+                              case 'user-not-found':
+                                errorMsg = 'User not found.';
                                 break;
-                              case 'weak-password':
-                                errorMsg = 'Password is too weak.';
+                              case 'wrong-password':
+                                errorMsg = 'Wrong password.';
                                 break;
-                              case 'operation-not-allowed':
-                                errorMsg = 'Operation not allowed.';
+                              case 'user-disabled':
+                                errorMsg = 'User account is disabled.';
                                 break;
                               default:
                                 errorMsg = e.message ?? errorMsg;
@@ -223,7 +173,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           );
                         }
                       },
-                      child: Text('Register'),
+                      child: Text('Login'),
                     ),
                   ),
                   SizedBox(height: 16),
@@ -250,15 +200,48 @@ class _RegisterPageState extends State<RegisterPage> {
                         height: 24,
                         width: 24,
                       ),
-                      label: Text('Sign up with Google'),
-                      onPressed: () {
-                        // TODO: Implement Google sign-in logic
+                      label: Text('Sign in with Google'),
+                      onPressed: () async {
+                        showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder:
+                              (context) =>
+                                  Center(child: CircularProgressIndicator()),
+                        );
+                        try {
+                          final user = await _authService.signInWithGoogle();
+                          Navigator.of(context).pop(); // Remove loading
+                          if (user == null) {
+                            toastification.show(
+                              context: context,
+                              title: Text('Google sign-in was cancelled.'),
+                              autoCloseDuration: const Duration(seconds: 5),
+                            );
+                          } else {
+                            Navigator.of(context).pushAndRemoveUntil(
+                              MaterialPageRoute(
+                                builder: (context) => AuthGate(),
+                              ),
+                              (route) => false,
+                            );
+                          }
+                        } catch (e) {
+                          Navigator.of(context).pop(); // Remove loading
+                          toastification.show(
+                            context: context,
+                            title: Text(
+                              'Google sign-in failed. Please try again.',
+                            ),
+                            autoCloseDuration: const Duration(seconds: 5),
+                          );
+                        }
                       },
                     ),
                   ),
                   SizedBox(height: 32),
                   Text(
-                    'Join MoviRate and start sharing your movie reviews!',
+                    'Write and share your movie reviews',
                     style: TextStyle(
                       color: Colors.black45,
                       fontSize: 16,
@@ -270,11 +253,11 @@ class _RegisterPageState extends State<RegisterPage> {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => LoginPage()),
+                        MaterialPageRoute(builder: (context) => RegisterPage()),
                       );
                     },
                     child: Text(
-                      'Already have an account? Login',
+                      "Don't have an account? Register",
                       style: TextStyle(color: Color(0xFF5B5B8C)),
                     ),
                   ),

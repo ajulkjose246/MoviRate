@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../screen/login_page.dart';
-import '../screen/home_page.dart';
+import 'package:movirate/screen/nav_bar.dart';
+import 'login_page.dart';
 
 class AuthGate extends StatelessWidget {
   const AuthGate({super.key});
@@ -17,7 +17,7 @@ class AuthGate extends StatelessWidget {
           );
         }
         if (snapshot.hasData && snapshot.data != null) {
-          return const HomePage();
+          return const NavBar();
         } else {
           return const LoginPage();
         }

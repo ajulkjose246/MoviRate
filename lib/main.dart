@@ -1,7 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:movirate/auth/auth_gate.dart';
-import 'package:movirate/screen/login_page.dart';
+import 'package:movirate/auth/login_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
