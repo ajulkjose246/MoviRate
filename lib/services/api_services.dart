@@ -65,22 +65,46 @@ class ApiService {
     final creditsResponse = await http.get(
       Uri.parse('$_baseUrl/$movieId/credits?api_key=$_apiKey'),
     );
+    final videosResponse = await http.get(
+      Uri.parse('$_baseUrl/$movieId/videos?api_key=$_apiKey&language=en-US'),
+    );
+    final providersResponse = await http.get(
+      Uri.parse('$_baseUrl/$movieId/watch/providers?api_key=$_apiKey'),
+    );
 
-    if (movieResponse.statusCode == 200 && creditsResponse.statusCode == 200) {
+    if (movieResponse.statusCode == 200 &&
+        creditsResponse.statusCode == 200 &&
+        videosResponse.statusCode == 200 &&
+        providersResponse.statusCode == 200) {
       final movieData = json.decode(movieResponse.body);
       final creditsData = json.decode(creditsResponse.body);
+      final videosData = json.decode(videosResponse.body);
+      final providersData = json.decode(providersResponse.body);
 
-      // Get only first 5 cast members
+      // Get only first 10 cast members
       final limitedCast = (creditsData['cast'] as List).take(10).toList();
-      // Get only first 5 crew members
+      // Get only first 10 crew members
       final limitedCrew = (creditsData['crew'] as List).take(10).toList();
+
+      // Filter only trailer type videos
+      final trailers =
+          (videosData['results'] as List)
+              .where((video) => video['type'] == 'Trailer')
+              .toList();
+
+      // Get Indian streaming providers if available
+      final indianProviders = providersData['results']['IN'] ?? {};
 
       return {
         ...movieData,
         'credits': {'cast': limitedCast, 'crew': limitedCrew},
+        'trailers': trailers,
+        'streaming_providers': indianProviders,
       };
     } else {
-      throw Exception('Failed to load movie details or credits');
+      throw Exception(
+        'Failed to load movie details, credits, trailers or providers',
+      );
     }
   }
 }

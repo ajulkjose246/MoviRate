@@ -19,19 +19,7 @@ class _HomePageState extends State<HomePage> {
       child: SafeArea(
         child: Scaffold(
           backgroundColor: const Color(0xFF181829),
-          appBar: AppBar(
-            backgroundColor: const Color(0xFF181829),
-            elevation: 0,
-            automaticallyImplyLeading: false,
-            title: const Text(
-              'Movirate',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
+
           body: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

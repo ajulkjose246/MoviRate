@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class MovieDetailPage extends StatefulWidget {
   final Map<String, dynamic> movieData;
@@ -9,10 +10,17 @@ class MovieDetailPage extends StatefulWidget {
 }
 
 class _MovieDetailPageState extends State<MovieDetailPage> {
+  Future<void> _launchURL(String url) async {
+    final Uri uri = Uri.parse(url);
+    if (!await launchUrl(uri)) {
+      throw Exception('Could not launch $url');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-
+    print(widget.movieData['id']);
     return Scaffold(
       backgroundColor: const Color(0xFF181829),
       body: SingleChildScrollView(
@@ -139,7 +147,245 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
 
                   const SizedBox(height: 24),
 
-                  // Additional Information
+                  // Trailers Section
+                  if (widget.movieData['trailers'] != null &&
+                      (widget.movieData['trailers'] as List).isNotEmpty)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Trailers',
+                          style: Theme.of(
+                            context,
+                          ).textTheme.titleLarge?.copyWith(color: Colors.white),
+                        ),
+                        const SizedBox(height: 16),
+                        SizedBox(
+                          height: 50,
+                          child: ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            itemCount:
+                                (widget.movieData['trailers'] as List).length,
+                            itemBuilder: (context, index) {
+                              final trailer =
+                                  widget.movieData['trailers'][index];
+                              return Padding(
+                                padding: const EdgeInsets.only(right: 8.0),
+                                child: ElevatedButton.icon(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.red,
+                                    foregroundColor: Colors.white,
+                                  ),
+                                  onPressed: () {
+                                    _launchURL(
+                                      'https://www.youtube.com/watch?v=${trailer['key']}',
+                                    );
+                                  },
+                                  icon: const Icon(Icons.play_circle_outline),
+                                  label: Text('Trailer ${index + 1}'),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                      ],
+                    ),
+
+                  // Streaming Platforms Section
+                  if (widget.movieData['streaming_providers'] != null &&
+                      (widget.movieData['streaming_providers']['buy'] != null ||
+                          widget.movieData['streaming_providers']['rent'] !=
+                              null ||
+                          widget.movieData['streaming_providers']['flatrate'] !=
+                              null))
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Watch Options',
+                          style: Theme.of(
+                            context,
+                          ).textTheme.titleLarge?.copyWith(color: Colors.white),
+                        ),
+                        const SizedBox(height: 16),
+
+                        // Flatrate (Streaming) Section
+                        if (widget
+                                .movieData['streaming_providers']['flatrate'] !=
+                            null) ...[
+                          Text(
+                            'Stream',
+                            style: Theme.of(
+                              context,
+                            ).textTheme.titleMedium?.copyWith(
+                              color: Colors.white70,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children:
+                                (widget.movieData['streaming_providers']['flatrate']
+                                        as List)
+                                    .map(
+                                      (provider) => Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                          vertical: 8,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white.withOpacity(0.1),
+                                          borderRadius: BorderRadius.circular(
+                                            20,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            if (provider['logo_path'] != null)
+                                              Image.network(
+                                                'https://image.tmdb.org/t/p/original${provider['logo_path']}',
+                                                height: 20,
+                                                width: 20,
+                                              ),
+                                            if (provider['logo_path'] != null)
+                                              const SizedBox(width: 8),
+                                            Text(
+                                              provider['provider_name'],
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    )
+                                    .toList(),
+                          ),
+                          const SizedBox(height: 16),
+                        ],
+
+                        // Buy Section
+                        if (widget.movieData['streaming_providers']['buy'] !=
+                            null) ...[
+                          Text(
+                            'Buy',
+                            style: Theme.of(
+                              context,
+                            ).textTheme.titleMedium?.copyWith(
+                              color: Colors.white70,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children:
+                                (widget.movieData['streaming_providers']['buy']
+                                        as List)
+                                    .map(
+                                      (provider) => Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                          vertical: 8,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white.withOpacity(0.1),
+                                          borderRadius: BorderRadius.circular(
+                                            20,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            if (provider['logo_path'] != null)
+                                              Image.network(
+                                                'https://image.tmdb.org/t/p/original${provider['logo_path']}',
+                                                height: 20,
+                                                width: 20,
+                                              ),
+                                            if (provider['logo_path'] != null)
+                                              const SizedBox(width: 8),
+                                            Text(
+                                              provider['provider_name'],
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    )
+                                    .toList(),
+                          ),
+                          const SizedBox(height: 16),
+                        ],
+
+                        // Rent Section
+                        if (widget.movieData['streaming_providers']['rent'] !=
+                            null) ...[
+                          Text(
+                            'Rent',
+                            style: Theme.of(
+                              context,
+                            ).textTheme.titleMedium?.copyWith(
+                              color: Colors.white70,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children:
+                                (widget.movieData['streaming_providers']['rent']
+                                        as List)
+                                    .map(
+                                      (provider) => Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                          vertical: 8,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white.withOpacity(0.1),
+                                          borderRadius: BorderRadius.circular(
+                                            20,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            if (provider['logo_path'] != null)
+                                              Image.network(
+                                                'https://image.tmdb.org/t/p/original${provider['logo_path']}',
+                                                height: 20,
+                                                width: 20,
+                                              ),
+                                            if (provider['logo_path'] != null)
+                                              const SizedBox(width: 8),
+                                            Text(
+                                              provider['provider_name'],
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    )
+                                    .toList(),
+                          ),
+                        ],
+                        const SizedBox(height: 24),
+                      ],
+                    ),
 
                   // Cast Section
                   const SizedBox(height: 24),
@@ -286,7 +532,9 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                         },
                       ),
                     ),
-                  const SizedBox(height: 16),
+
+                  // Additional Information
+                  const SizedBox(height: 24),
                   Text(
                     'Additional Information',
                     style: Theme.of(
