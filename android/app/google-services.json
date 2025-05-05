@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "442433464342",
+    "project_id": "movirate-akjpro",
+    "storage_bucket": "movirate-akjpro.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:442433464342:android:78e7e69c5f5ec2525c2d37",
+        "android_client_info": {
+          "package_name": "com.akjpro.movirate"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAekMkC3kiESJoDqVhG-cvxUSZovDziqHE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
