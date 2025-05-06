@@ -76,24 +76,41 @@ class ApiService {
         creditsResponse.statusCode == 200 &&
         videosResponse.statusCode == 200 &&
         providersResponse.statusCode == 200) {
-      final movieData = json.decode(movieResponse.body);
-      final creditsData = json.decode(creditsResponse.body);
-      final videosData = json.decode(videosResponse.body);
-      final providersData = json.decode(providersResponse.body);
+      final movieData = json.decode(movieResponse.body) as Map<String, dynamic>;
+      final creditsData =
+          json.decode(creditsResponse.body) as Map<String, dynamic>;
+      final videosData =
+          json.decode(videosResponse.body) as Map<String, dynamic>;
+      final providersData =
+          json.decode(providersResponse.body) as Map<String, dynamic>;
 
       // Get only first 10 cast members
-      final limitedCast = (creditsData['cast'] as List).take(10).toList();
+      final List<Map<String, dynamic>> limitedCast =
+          ((creditsData['cast'] as List?) ?? [])
+              .take(10)
+              .map((item) => Map<String, dynamic>.from(item as Map))
+              .toList();
+
       // Get only first 10 crew members
-      final limitedCrew = (creditsData['crew'] as List).take(10).toList();
+      final List<Map<String, dynamic>> limitedCrew =
+          ((creditsData['crew'] as List?) ?? [])
+              .take(10)
+              .map((item) => Map<String, dynamic>.from(item as Map))
+              .toList();
 
       // Filter only trailer type videos
-      final trailers =
-          (videosData['results'] as List)
-              .where((video) => video['type'] == 'Trailer')
+      final List<Map<String, dynamic>> trailers =
+          ((videosData['results'] as List?) ?? [])
+              .where((video) => (video as Map)['type'] == 'Trailer')
+              .map((item) => Map<String, dynamic>.from(item as Map))
               .toList();
 
       // Get Indian streaming providers if available
-      final indianProviders = providersData['results']['IN'] ?? {};
+      final results = providersData['results'] as Map<String, dynamic>?;
+      final indianProviders =
+          results != null && results.containsKey('IN')
+              ? Map<String, dynamic>.from(results['IN'] as Map)
+              : <String, dynamic>{};
 
       return {
         ...movieData,

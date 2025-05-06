@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:movirate/screen/favorite_page.dart';
 import 'package:movirate/screen/home_page.dart';
+import 'package:movirate/screen/list_page.dart';
 import 'package:movirate/screen/search_page.dart';
 import 'package:movirate/services/api_services.dart';
 
@@ -18,16 +19,24 @@ class _NavBarState extends State<NavBar> {
     Icons.home_rounded,
     Icons.search_rounded,
     Icons.favorite_rounded,
+    Icons.list_rounded,
     Icons.person_rounded,
   ];
 
-  final List<String> _labels = ['Home', 'Search', 'Favorites', 'Profile'];
+  final List<String> _labels = [
+    'Home',
+    'Search',
+    'Favorites',
+    'Watchlist',
+    'Profile',
+  ];
 
   // Add your pages here
   final List<Widget> _pages = [
     HomePage(), // Replace with your actual page widgets
     SearchPage(),
     FavoritePage(),
+    ListPage(),
     Text("data"),
   ];
 
@@ -52,7 +61,9 @@ class _NavBarState extends State<NavBar> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF181829),
-      body: _pages[_selectedIndex], // Show the selected page
+      body: SafeArea(
+        child: _pages[_selectedIndex], // Show the selected page
+      ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         backgroundColor: const Color(0xFF232336),

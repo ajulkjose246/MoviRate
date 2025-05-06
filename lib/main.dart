@@ -5,6 +5,9 @@ import 'package:movirate/auth/login_page.dart';
 import 'package:provider/provider.dart';
 import 'providers/recent_movies_provider.dart';
 import 'providers/favorite_movies_provider.dart';
+import 'providers/watched_movies_provider.dart';
+import 'providers/movie_lists_provider.dart';
+import 'providers/movie_reviews_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,7 +30,22 @@ class MyApp extends StatelessWidget {
             return provider;
           },
         ),
+        ChangeNotifierProvider(
+          create: (_) {
+            final provider = WatchedMoviesProvider();
+            provider.startListening(); // Start listening for changes
+            return provider;
+          },
+        ),
         ChangeNotifierProvider(create: (_) => RecentMoviesProvider()),
+        ChangeNotifierProvider(
+          create: (_) {
+            final provider = MovieListsProvider();
+            provider.startListening(); // Start listening for changes
+            return provider;
+          },
+        ),
+        ChangeNotifierProvider(create: (_) => MovieReviewsProvider()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
