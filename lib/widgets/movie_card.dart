@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import '../services/api_services.dart';
 import '../screen/movie_detail_page.dart';
+import 'package:provider/provider.dart';
+import '../providers/recent_movies_provider.dart';
+import '../providers/favorite_movies_provider.dart';
 
 class MovieCard extends StatefulWidget {
   final String imageUrl;
@@ -8,7 +11,6 @@ class MovieCard extends StatefulWidget {
   final double rating; // IMDb rating
   final int movieId;
   final bool isFavorite;
-  final VoidCallback? onFavoriteTap;
 
   const MovieCard({
     Key? key,
@@ -17,7 +19,6 @@ class MovieCard extends StatefulWidget {
     required this.rating,
     required this.movieId,
     this.isFavorite = false,
-    this.onFavoriteTap,
   }) : super(key: key);
 
   @override
@@ -49,6 +50,18 @@ class _MovieCardState extends State<MovieCard>
 
   Future<void> _navigateToDetail() async {
     try {
+      // Save to recent movies using provider
+      final recentMoviesProvider = Provider.of<RecentMoviesProvider>(
+        context,
+        listen: false,
+      );
+      await recentMoviesProvider.addRecentMovie({
+        'id': widget.movieId,
+        'title': widget.title,
+        'poster_path': widget.imageUrl,
+        'vote_average': widget.rating,
+      });
+
       final movieData = await _apiService.fetchMovieDetails(widget.movieId);
       if (!mounted) return;
 
@@ -178,26 +191,34 @@ class _MovieCardState extends State<MovieCard>
                   right: 10,
                   child: Material(
                     color: Colors.transparent,
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(20),
-                      onTap: widget.onFavoriteTap,
-                      child: Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          color: Colors.black45,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          widget.isFavorite
-                              ? Icons.favorite
-                              : Icons.favorite_border,
-                          color:
-                              widget.isFavorite
-                                  ? Colors.redAccent
-                                  : Colors.white,
-                          size: 22,
-                        ),
-                      ),
+                    child: Consumer<FavoriteMoviesProvider>(
+                      builder: (context, favoritesProvider, child) {
+                        final isFavorite = favoritesProvider.isFavorite(
+                          widget.movieId,
+                        );
+                        return InkWell(
+                          borderRadius: BorderRadius.circular(20),
+                          onTap:
+                              () => favoritesProvider.toggleFavorite(
+                                widget.movieId,
+                              ),
+                          child: Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: Colors.black45,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              isFavorite
+                                  ? Icons.favorite
+                                  : Icons.favorite_border,
+                              color:
+                                  isFavorite ? Colors.redAccent : Colors.white,
+                              size: 22,
+                            ),
+                          ),
+                        );
+                      },
                     ),
                   ),
                 ),

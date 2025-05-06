@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:movirate/screen/favorite_page.dart';
 import 'package:movirate/screen/home_page.dart';
 import 'package:movirate/screen/search_page.dart';
 import 'package:movirate/services/api_services.dart';
@@ -26,7 +27,7 @@ class _NavBarState extends State<NavBar> {
   final List<Widget> _pages = [
     HomePage(), // Replace with your actual page widgets
     SearchPage(),
-    Text("data"),
+    FavoritePage(),
     Text("data"),
   ];
 
